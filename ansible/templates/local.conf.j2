@@ -1,0 +1,25 @@
+[[local|localrc]]
+enable_service h-eng h-api h-api-cfn h-api-cw
+enable_plugin heat https://opendev.org/openstack/heat {{ openstack_version }}
+ADMIN_PASSWORD={{ openstack_admin_password }}
+DATABASE_PASSWORD={{ openstack_db_password }}
+RABBIT_PASSWORD={{ openstack_rabbitmq_password }}
+SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+HOST_IP={{ openstack_host_ipv4 }}
+HOST_IPV6={{ openstack_host_ipv6 }}
+FLOATING_RANGE={{ openstack_floating_range }}
+FIXED_RANGE={{ openstack_fixed_range }}
+
+IMAGE_URL_SITE="https://download.fedoraproject.org"
+IMAGE_URL_PATH="/pub/fedora/linux/releases/32/Cloud/x86_64/images/"
+IMAGE_URL_FILE="Fedora-Cloud-Base-32-1.6.x86_64.qcow2"
+IMAGE_URLS+=","$IMAGE_URL_SITE$IMAGE_URL_PATH$IMAGE_URL_FILE
+
+LOGFILE=$DEST/logs/stack.sh.log
+LOGDAYS=2
+LOG_COLOR=false
+
+SWIFT_HASH=66a3d6b56c1f479c8b4e70ab5c2000f5
+SWIFT_REPLICAS=1
+SWIFT_DATA_DIR=$DEST/data

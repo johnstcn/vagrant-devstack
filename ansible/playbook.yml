@@ -1,0 +1,150 @@
+---
+  - hosts: all
+    connection: local
+    gather_facts: true
+    become: false
+
+    vars:
+      - verbose: false
+      - openstack_version: "stable/victoria"
+      - openstack_admin_password: "insecurepass"
+      - openstack_db_password: "insecurepass"
+      - openstack_rabbitmq_password: "insecurepass"
+      - openstack_host_ipv4: "10.0.2.15"
+      - openstack_host_ipv6: "2001:db8:cafe:1e:1234::2"
+      - openstack_floating_range: "192.168.1.224/27"
+      - openstack_fixed_range: "10.11.12.0/24"
+
+    tasks:
+      - name: Print all available facts
+        ansible.builtin.debug:
+          var: ansible_facts
+        when: verbose
+
+      - name: enable ipv6 by default
+        become: true
+        sysctl:
+          name: "{{ item }}"
+          value: 0
+        loop:
+          - net.ipv6.conf.all.disable_ipv6
+          - net.ipv6.conf.default.disable_ipv6
+
+      - name: disable selinux
+        selinux: 
+          state: disabled
+        become: true
+        when: ansible_distribution == 'CentOS' 
+
+      - name: set timezone
+        # workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1696586
+        #timezone:
+        #  name: Europe/Dublin
+        file:
+          src: "/usr/share/zoneinfo/{{ timezone }}"
+          dest: "/etc/localtime"
+          state: link
+        become: true
+
+      - name: generate openssh keypair
+        openssh_keypair:
+          path: "~/.ssh/id_rsa"
+          state: present
+
+      - name: install required packages (CentOS)
+        dnf:
+          name: "{{ packages_centos }}"
+          state: present
+        become: true
+        when: ansible_distribution == 'CentOS' 
+
+      - name: install required packages (Ubuntu)
+        apt:
+          name: "{{ packages_ubuntu }}"
+          state: present
+        become: true
+        when: ansible_distribution == 'Ubuntu'
+
+      - name: set global pip config
+        copy:
+          src: pip.conf
+          dest: /etc/pip.conf
+        become: true
+
+      - name: nuke dnf cache
+        file:
+          path: "/var/cache/dnf"
+          state: absent
+        become: true
+        when: ansible_distribution == 'CentOS' 
+
+      - name: nuke apt cache
+        file:
+          path: "/var/cache/apt/archives"
+          state: absent
+        become: true
+        when: ansible_distribution == 'Ubuntu'
+
+      - name: ensure presence of cache dirs on shared folder
+        file:
+          path: "{{ item }}"
+          state: directory
+        with_items:
+          - "/vagrant/.cache/pip"
+          - "/vagrant/.cache/dnf"
+          - "/vagrant/.cache/apt-archives"
+
+      - name: symlink pip cache
+        file:
+          src: "/vagrant/.cache/pip"
+          dest: "/var/cache/pip"
+          state: link
+          force: true
+        become: true
+
+      - name: symlink dnf cache
+        file:
+          src: "/vagrant/.cache/dnf"
+          dest: "/var/cache/dnf"
+          state: link
+          force: true
+        become: true
+        when: ansible_distribution == 'CentOS' 
+
+      - name: symlink apt cache
+        file:
+          src: "/vagrant/.cache/apt-archives"
+          dest: "/var/cache/apt/archives"
+          state: link
+          force: true
+        become: true
+        when: ansible_distribution == 'Ubuntu'
+
+      - name: install fzf
+        include_role: { role: fzf }
+
+      - name: install ripgrep
+        include_role: { role: ripgrep }
+
+      - name: add tricked out vimrc
+        copy:
+          src: vimrc
+          dest: /home/vagrant/.vimrc
+
+      - name: clone devstack git repo
+        git:
+          repo: https://opendev.org/openstack/devstack
+          dest: /home/vagrant/devstack
+          version: master
+
+      - name: template localrc
+        template:
+          src: local.conf.j2
+          dest: /home/vagrant/devstack/local.conf
+
+      - apt:
+          name: python3-distutils
+          state: present
+        become: true
+
+...

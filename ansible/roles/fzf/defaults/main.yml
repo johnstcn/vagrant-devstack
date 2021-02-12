@@ -1,0 +1,6 @@
+---
+  fzf_version: "0.24.4"
+  fzf_os: "linux"
+  fzf_arch: "amd64"
+  fzf_git_url: "https://github.com/junegunn/fzf"
+  fzf_vim_git_url: "https://github.com/junegunn/fzf.vim"

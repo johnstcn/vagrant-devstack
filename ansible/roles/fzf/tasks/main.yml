@@ -1,0 +1,23 @@
+---
+- name: clone fzf repo to user home
+  git:
+    repo: "{{ fzf_git_url }}"
+    dest: "/home/vagrant/.fzf"
+    version: master
+
+- name: run fzf setup script
+  shell: |
+    /home/vagrant/.fzf/install --all
+
+- name: ensure user vim dir exists
+  file:
+    path: "/home/vagrant/.vim/pack/packages/start"
+    state: directory
+    recurse: true
+    owner: vagrant
+
+- name: clone fzf.vim repo to user vim dir
+  git:
+    repo: "{{ fzf_vim_git_url }}"
+    dest: "/home/vagrant/.vim/pack/packages/start/fzf.vim"
+    version: master

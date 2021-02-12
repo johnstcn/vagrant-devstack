@@ -1,0 +1,9 @@
+---
+timezone: "Europe/London"
+packages_ubuntu:
+  - git
+  - vim
+  - vim-airline
+packages_centos:
+  - git
+...

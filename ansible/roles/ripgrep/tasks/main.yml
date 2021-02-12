@@ -1,0 +1,10 @@
+---
+- name: fetch ripgrep package
+  get_url:
+    url: "{{ ripgrep_url }}"
+    dest: "/var/tmp/ripgrep.deb"
+
+- name: install ripgrep
+  apt:
+    deb: "/var/tmp/ripgrep.deb"
+  become: true
