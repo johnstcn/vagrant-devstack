@@ -6,6 +6,7 @@
 
     vars:
       - verbose: false
+      - use_cache: false
       - openstack_version: "stable/victoria"
       - openstack_admin_password: "insecurepass"
       - openstack_db_password: "insecurepass"
@@ -76,14 +77,18 @@
           path: "/var/cache/dnf"
           state: absent
         become: true
-        when: ansible_distribution == 'CentOS' 
+        when:
+          - ansible_distribution == 'CentOS' 
+          - use_cache
 
       - name: nuke apt cache
         file:
           path: "/var/cache/apt/archives"
           state: absent
         become: true
-        when: ansible_distribution == 'Ubuntu'
+        when:
+          - ansible_distribution == 'Ubuntu'
+          - use_cache
 
       - name: ensure presence of cache dirs on shared folder
         file:
@@ -93,6 +98,7 @@
           - "/vagrant/.cache/pip"
           - "/vagrant/.cache/dnf"
           - "/vagrant/.cache/apt-archives"
+        when: use_cache
 
       - name: symlink pip cache
         file:
@@ -101,6 +107,7 @@
           state: link
           force: true
         become: true
+        when: use_cache
 
       - name: symlink dnf cache
         file:
@@ -109,7 +116,9 @@
           state: link
           force: true
         become: true
-        when: ansible_distribution == 'CentOS' 
+        when:
+          - ansible_distribution == 'CentOS' 
+          - use_cache
 
       - name: symlink apt cache
         file:
@@ -118,7 +127,9 @@
           state: link
           force: true
         become: true
-        when: ansible_distribution == 'Ubuntu'
+        when:
+          - ansible_distribution == 'Ubuntu'
+          - use_cache
 
       - name: install fzf
         include_role: { role: fzf }
@@ -135,7 +146,7 @@
         git:
           repo: https://opendev.org/openstack/devstack
           dest: /home/vagrant/devstack
-          version: master
+          version: "{{ openstack_version }}"
 
       - name: template localrc
         template:

@@ -9,7 +9,7 @@ Vagrant.configure('2') do |config|
     #devstack.vm.synced_folder './', '/vagrant', type: 'nfs', mount_options: ['vers=3', 'tcp', 'nolock', 'rw']
     devstack.vm.synced_folder './', '/vagrant'
     #devstack.vm.synced_folder '~/src', '/home/vagrant/src', type: 'nfs', mount_options: ['vers=3', 'tcp', 'nolock', 'rw']
-    devstack.vm.synced_folder '~/src', '/home/vagrant/src'
+    #devstack.vm.synced_folder '~/src', '/home/vagrant/src'
     # For libvirt:
     devstack.vm.provider :libvirt do |lv|
       lv.cpus = 4
