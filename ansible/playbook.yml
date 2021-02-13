@@ -154,7 +154,9 @@
           dest: /home/vagrant/devstack/local.conf
 
       - apt:
-          name: python3-distutils
+          name:
+            - python3-distutils
+            - python3-dev
           state: present
         become: true
 
